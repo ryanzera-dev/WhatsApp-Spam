@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WhatsApp - Ryan Script
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.6
 // @description  Script de Automação para funcionalidades do WhatsApp
 // @author       @ryanzera.dev
 // @license      www.instagram.com/ryanzera.dev
@@ -758,22 +758,35 @@ function animateArrow() {
     }
 
     const importModal = document.createElement('div');
-    importModal.id = 'importModal';
-    importModal.innerHTML = `
-        <h2 style="margin-bottom: 20px; margin-top: 20px; font-size: 24px; font-weight: 700; color: #FFFFFF; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); background: linear-gradient(to right, #464646, #2F2F2F); display: block; padding: 10px 20px; border-radius: 5px; margin: 0 auto; transform: translate(-50%, -50%); position: relative; left: 50%; top: 50%; text-align: center;">Importar Arquivo Excel</h2> <!-- Título estilizado -->
-        <label for="fileInput" style="display: block; text-align: center; margin-bottom: 10px;">Anexar arquivo:</label>
-        <input type="file" id="fileInput" accept=".xlsx, .xls" style="margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.2);"> <!-- Campo de seleção de arquivo com borda branca -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <button id="importModalSubmit" data-icon="attach-menu-plus" style="margin-right: 10px;">Carregar informações</button>
-            <button id="closeModalButton" data-icon="clear" style="margin-left: 10px;">Fechar</button>
-        </div>
-        <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.5); width: 80%; margin: 0 auto 20px;"> <!-- Linha ultrafina branca -->
-        <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cloud-haze2-fill" viewBox="0 0 16 16" style="margin-bottom: 10px;"> <!-- Ícone -->
-                <path d="M8.5 2a5 5 0 0 1 4.905 4.027A3 3 0 0 1 13 12H3.5A3.5 3.5 0 0 1 .035 9H5.5a.5.5 0 0 0 0-1H.035a3.5 3.5 0 0 1 3.871-2.977A5 5 0 0 1 8.5 2m-6 8a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zM0 13.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5"/></svg>
-            <p style="color: #808080; font-size: 13px; font-family: Arial, sans-serif; margin: 0;">Por favor, selecione um arquivo .xlsx ou .xls para importar seus contatos. Se apresentar qualquer problema, <a href="#" id="reloadPage">clique aqui</a> para reiniciar a página.</p> <!-- Legenda -->
-        </div>
-    `;
+importModal.id = 'importModal';
+importModal.innerHTML = `
+    <h2 style="margin-bottom: 20px; margin-top: 20px; font-size: 24px; font-weight: 700; color: #FFFFFF; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); background: linear-gradient(to right, #464646, #2F2F2F); display: block; padding: 10px 20px; border-radius: 5px; margin: 0 auto; transform: translate(-50%, -50%); position: relative; left: 50%; top: 50%; text-align: center;">Importar Arquivo Excel</h2> <!-- Título estilizado -->
+    <div style="text-align: center;">
+        <input type="file" id="fileInput" accept=".xlsx, .xls" style="margin: 0 auto 10px; display: inline-block; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.2); width: 200px;"> <!-- Campo de seleção de arquivo com borda branca -->
+    </div>
+    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <button id="importModalSubmit" data-icon="attach-menu-plus" style="margin-right: 10px;">Carregar informações</button>
+        <button id="closeModalButton" data-icon="clear" style="margin-left: 10px;">Fechar</button>
+    </div>
+    <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.5); width: 80%; margin: 0 auto 20px;"> <!-- Linha ultrafina branca -->
+    <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cloud-haze2-fill" viewBox="0 0 16 16" style="margin-bottom: 10px;"> <!-- Ícone -->
+            <path d="M8.5 2a5 5 0 0 1 4.905 4.027A3 3 0 0 1 13 12H3.5A3.5 3.5 0 0 1 .035 9H5.5a.5.5 0 0 0 0-1H.035a3.5 3.5 0 0 1 3.871-2.977A5 5 0 0 1 8.5 2m-6 8a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zM0 13.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5"/></svg>
+        <p style="color: #808080; font-size: 13px; font-family: Arial, sans-serif; margin: 0;">Por favor, selecione um arquivo .xlsx ou .xls para importar seus contatos. Se apresentar qualquer problema, <a href="#" id="reloadPage">clique aqui</a> para reiniciar a página.</p> <!-- Legenda -->
+    </div>
+`;
+
+// Ajuste de estilo para o botão de "Escolher arquivo"
+const fileInput = importModal.querySelector('#fileInput');
+fileInput.style.width = 'auto'; // Definindo a largura automaticamente para a largura do texto
+fileInput.style.padding = '8px 12px'; // Adicionando um preenchimento interno para melhorar a aparência
+fileInput.style.borderRadius = '3px'; // Adicionando uma pequena curvatura nas bordas
+
+// Removendo o espaçamento inferior do título e do botão "Carregar informações"
+const title = importModal.querySelector('h2');
+title.style.marginBottom = '10px';
+const loadButton = importModal.querySelector('#importModalSubmit');
+loadButton.style.marginBottom = '10px';
 
     document.body.appendChild(importModal);
 
