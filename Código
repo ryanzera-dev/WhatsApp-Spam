@@ -1,0 +1,1313 @@
+// ==UserScript==
+// @name         WhatsApp - Ryan Script
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  Script de Automação para funcionalidades do WhatsApp
+// @author       @ryanzera.dev
+// @license      www.instagram.com/ryanzera.dev
+// @match        https://web.whatsapp.com/*
+// @grant        GM_addStyle
+// @grant        GM_xmlhttpRequest
+// @grant        GM_download
+// @require      https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js
+// @icon         data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%20fill%3D%22%23CB912F%22%20%2F%3E%3Cpath%20%20d%3D%22m35%2C32c0%2C1.66-1.34%2C3-3%2C3s-3-1.34-3-3%2C1.34-3%2C3-3%2C3%2C1.34%2C3%2C3Zm21%2C0c0%2C13.25-10.75%2C24-24%2C24s-24-10.75-24-24%2C10.75-24%2C24-24%2C24%2C10.75%2C24%2C24Zm-10-12.59l-1.41-1.41-17.59%2C9-9%2C17.59%2C1.41%2C1.41%2C17.59-9%2C9-17.59Z%22%20fill%3D%22%23CB912F%22%20%2F%3E%3C%2Fsvg%3E
+// @downloadURL  
+// @updateURL    
+// ==/UserScript==
+
+(function() {// Marca D'água
+    'use strict';
+
+    // Criando o container para o botão de seta e a caixa de informações
+    var container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.bottom = '50vh';
+    container.style.right = '0%';
+    container.style.zIndex = '9999';
+    document.body.appendChild(container);
+
+    // Criando a caixa de informações
+    var infoBox = document.createElement('div');
+    infoBox.innerHTML = `
+        <div style="font-family: Roboto, sans-serif; color: #FFFFFF; text-align: center;">
+            <h2 style="margin-bottom: 10px; font-size: 24px; font-weight: 700; color: #FFFFFF; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); background: linear-gradient(to right, #464646, #2F2F2F); display: inline-block; padding: 10px 20px; border-radius: 10px; margin: 0 auto; transform: translateY(-50%); line-height: 1.5;">CONTATO</h2>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'%3E%3Cpath d='M0 96l576 0c0-35.3-28.7-64-64-64H64C28.7 32 0 60.7 0 96zm0 32V416c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V128H0zM64 405.3c0-29.5 23.9-53.3 53.3-53.3H234.7c29.5 0 53.3 23.9 53.3 53.3c0 5.9-4.8 10.7-10.7 10.7H74.7c-5.9 0-10.7-4.8-10.7-10.7zM176 192a64 64 0 1 1 0 128 64 64 0 1 1 0-128zm176 16c0-8.8 7.2-16 16-16H496c8.8 0 16 7.2 16 16s-7.2 16-16 16H368c-8.8 0-16-7.2-16-16zm0 64c0-8.8 7.2-16 16-16H496c8.8 0 16 7.2 16 16s-7.2 16-16 16H368c-8.8 0-16-7.2-16-16zm0 64c0-8.8 7.2-16 16-16H496c8.8 0 16 7.2 16 16s-7.2 16-16 16H368c-8.8 0-16-7.2-16-16z'/%3E%3C/svg%3E" alt="Ícone" style="width: 20px; height: 20px; margin-bottom: 5px; filter: brightness(0) invert(1); opacity: 0.5; display: block; margin: 0 auto; margin-bottom: 15px;"> <!-- Ícone -->
+            <hr style="border: none; border-top: 1px solid rgba(255, 255, 255, 0.2); margin-bottom: 15px;">
+            <ul style="list-style-type: none; padding-left: 0; margin-bottom: 10px; margin-top: -10px;">
+                <li style="margin-bottom: 5px;"><a href="https://api.whatsapp.com/send?phone=5548984613946" target="_blank" style="text-decoration: none; color: inherit; display: flex; align-items: center; padding: 5px; border-radius: 5px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone-plus-fill" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877zM12.5 1a.5.5 0 0 1 .5.5V3h1.5a.5.5 0 0 1 0 1H13v1.5a.5.5 0 0 1-1 0V4h-1.5a.5.5 0 0 1 0-1H12V1.5a.5.5 0 0 1 .5-.5"/></svg> <span style="margin-left: 10px; font-weight: 400; line-height: 20px; font-size: 12px;">(48) 98461-3946</span></a></li>
+                <li style="margin-bottom: 5px;"><a href="mailto:ryanzera.dev@gmail.com" target="_blank" style="text-decoration: none; color: inherit; display: flex; align-items: center; padding: 5px; border-radius: 5px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-plus-fill" viewBox="0 0 16 16"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.026A2 2 0 0 0 2 14h6.256A4.5 4.5 0 0 1 8 12.5a4.49 4.49 0 0 1 1.606-3.446l-.367-.225L8 9.586zM16 4.697v4.974A4.5 4.5 0 0 0 12.5 8a4.5 4.5 0 0 0-1.965.45l-.338-.207z"/><path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-3.5-2a.5.5 0 0 0-.5.5v1h-1a.5.5 0 0 0 0 1h1v1a.5.5 0 0 0 1 0v-1h1a.5.5 0 0 0 0-1h-1v-1a.5.5 0 0 0-.5-.5"/></svg><span style="margin-left: 10px; font-weight: 400; line-height: 20px; font-size: 12px;">ryanzera.dev@gmail.com</span></a></li>
+                <li style="margin-bottom: 5px;"><a href="https://www.instagram.com/ryanzera.dev/" target="_blank" style="text-decoration: none; color: inherit; display: flex; align-items: center; padding: 5px; border-radius: 5px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-threads-fill" viewBox="0 0 16 16"><path d="M6.81 9.204c0-.41.197-1.062 1.727-1.062.469 0 .758.034 1.146.121-.124 1.606-.91 1.818-1.674 1.818-.418 0-1.2-.218-1.2-.877Z"/><path d="M2.59 16h10.82A2.59 2.59 0 0 0 16 13.41V2.59A2.59 2.59 0 0 0 13.41 0H2.59A2.59 2.59 0 0 0 0 2.59v10.82A2.59 2.59 0 0 0 2.59 16M5.866 5.91c.567-.81 1.315-1.126 2.35-1.126.73 0 1.351.246 1.795.711.443.466.696 1.132.754 1.983q.368.154.678.363c.832.559 1.29 1.395 1.29 2.353 0 2.037-1.67 3.806-4.692 3.806-2.595 0-5.291-1.51-5.291-6.004C2.75 3.526 5.361 2 8.033 2c1.234 0 4.129.182 5.217 3.777l-1.02.264c-.842-2.56-2.607-2.968-4.224-2.968-2.675 0-4.187 1.628-4.187 5.093 0 3.107 1.69 4.757 4.222 4.757 2.083 0 3.636-1.082 3.636-2.667 0-1.079-.906-1.595-.953-1.595-.177.925-.651 2.482-2.733 2.482-1.213 0-2.26-.838-2.26-1.936 0-1.568 1.488-2.136 2.663-2.136.44 0 .97.03 1.247.086 0-.478-.404-1.296-1.426-1.296-.911 0-1.16.288-1.45.624l-.024.027c-.202-.135-.875-.601-.875-.601Z"/></svg><span style="margin-left: 10px; font-weight: 400; line-height: 20px; font-size: 12px;">@ryanzera.dev</span></a></li>
+            </ul>
+        </div>
+    `;
+    infoBox.style.background = 'linear-gradient(to right, #272727, #2F2F2F)'; // Fundo gradiente
+    infoBox.style.padding = '15px 20px'; // Padding superior e inferior reduzido
+    infoBox.style.borderRadius = '5px'; // Bordas arredondadas
+    infoBox.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.2)'; // Sombra preta e linha branca
+    infoBox.style.position = 'fixed';
+    infoBox.style.bottom = '40%';
+    infoBox.style.right = '1px';
+    infoBox.style.transform = 'translateX(100%)'; // Inicialmente, a caixa de informações está fora da tela
+    infoBox.style.transition = 'transform 0.7s ease-in-out, opacity 0.7s ease-in-out';
+    container.appendChild(infoBox);
+
+    // Criando o botão de seta
+var arrowButton = document.createElement('div');
+arrowButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FFFFFF" class="bi bi-caret-left-fill" viewBox="0 0 16 16"><path fill="#2F2F2F" stroke="#FFFFFF" stroke-width="0.3" d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/></svg>';
+arrowButton.style.position = 'fixed';
+arrowButton.style.bottom = '100%'; // Posição vertical inicial
+arrowButton.style.right = '0px';
+arrowButton.style.cursor = 'pointer';
+arrowButton.style.transition = 'transform 0.7s ease-in-out, opacity 0.7s ease-in-out';
+arrowButton.style.transform = 'translateX(calc(-0px - 0px))'; // Posiciona a seta à esquerda da caixa de texto
+arrowButton.style.width = '24px'; // Definindo largura da seta
+arrowButton.style.height = '24px'; // Definindo altura da seta
+container.appendChild(arrowButton);
+
+
+    // Variável para armazenar o intervalo da animação da seta
+    var animationInterval;
+
+    // Função para abrir ou fechar a caixa de informações ao clicar na seta
+    function toggleInfoBox() {
+    if (infoBox.style.transform === 'translateX(100%)') {
+        infoBox.style.transform = 'translateX(0%)'; // Exibe a caixa de informações movendo para dentro da tela
+        infoBox.style.opacity = '1'; // Define a opacidade como totalmente visível
+        arrowButton.style.transform = 'translateX(calc(-0% - ' + (infoBox.offsetWidth + 0) + 'px))'; // Move a seta para o início da caixa de texto
+        // Interrompe a animação quando a caixa de texto é aberta
+        clearInterval(animationInterval);
+    } else {
+        infoBox.style.transform = 'translateX(100%)'; // Oculta a caixa de informações movendo para fora da tela
+        infoBox.style.opacity = '0'; // Define a opacidade como totalmente transparente
+        arrowButton.style.transform = 'translateX(calc(-0% - 0px))'; // Move a seta para a posição original
+        // Inicia a animação apenas se o mouse não estiver sobre o botão e a caixa de texto estiver fechada
+        if (!isMouseOverButton() && !isInfoBoxOpen()) {
+            startAnimation();
+        }
+    }
+}
+
+    // Função para calcular e ajustar a posição da seta
+    function adjustArrowPosition() {
+        var infoBoxHeight = infoBox.offsetHeight;
+        var arrowButtonHeight = arrowButton.offsetHeight;
+        var topOffset = (infoBoxHeight - arrowButtonHeight) / 2;
+        arrowButton.style.top = `calc(50% - ${topOffset}px)`;
+    }
+
+    // Verifica se o mouse está sobre o botão de seta
+    function isMouseOverButton() {
+        var rect = arrowButton.getBoundingClientRect();
+        var mouseX = event.clientX;
+        var mouseY = event.clientY;
+        return (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom);
+    }
+
+    // Verifica se a caixa de informações está aberta
+    function isInfoBoxOpen() {
+        return infoBox.style.transform === 'translateX(0%)';
+    }
+
+    // Adicionando evento de clique na seta
+    arrowButton.addEventListener('click', toggleInfoBox);
+
+    // Adicionando hover para o botão de seta
+    arrowButton.addEventListener('mouseenter', function() {
+        arrowButton.querySelector('svg path').setAttribute('fill', '#656565');
+        // Interrompe a animação quando o mouse está sobre o botão
+        clearInterval(animationInterval);
+    });
+
+    arrowButton.addEventListener('mouseleave', function() {
+        arrowButton.querySelector('svg path').setAttribute('fill', '#2F2F2F');
+        // Reinicia a animação se a caixa de texto estiver fechada
+        if (!isInfoBoxOpen()) {
+            startAnimation();
+        }
+    });
+
+    // Adicionando hover para os botões
+    var buttons = infoBox.querySelectorAll('a');
+    buttons.forEach(function(button) {
+        button.addEventListener('mouseenter', function() {
+            button.style.background = '#656565';
+            // Interrompe a animação quando o mouse está sobre os botões da caixa de texto
+            clearInterval(animationInterval);
+        });
+        button.addEventListener('mouseleave', function() {
+            button.style.background = 'transparent';
+            // Reinicia a animação se a caixa de texto estiver fechada
+            if (!isInfoBoxOpen()) {
+                startAnimation();
+            }
+        });
+    });
+
+    // Ajustando a posição da seta inicialmente
+    adjustArrowPosition();
+
+    // Ajustando a posição da seta sempre que a janela for redimensionada
+    window.addEventListener('resize', adjustArrowPosition);
+
+    // Função para iniciar a animação da seta
+    function startAnimation() {
+        animationInterval = setInterval(animateArrow, 3000); // Chama a função animateArrow a cada 3 segundos
+    }
+
+    // Função para animar a seta
+function animateArrow() {
+    // Verifica se a caixa de informações está aberta
+    if (!isInfoBoxOpen()) {
+        arrowButton.style.transform = 'translateY(-20px)'; // Move a seta mais para cima
+        setTimeout(function() {
+            arrowButton.style.transform = 'translateY(20px)'; // Move a seta mais para baixo
+            setTimeout(function() {
+                arrowButton.style.transform = 'translateY(-15px)'; // Move a seta um pouco para cima
+                setTimeout(function() {
+                    arrowButton.style.transform = 'translateY(15px)'; // Move a seta um pouco para baixo
+                    setTimeout(function() {
+                        arrowButton.style.transform = 'translateY(0)'; // Retorna a seta à sua posição original
+                    }, 200); // 0.2 segundos
+                }, 200); // 0.2 segundos
+            }, 200); // 0.2 segundos
+        }, 200); // 0.2 segundos
+    }
+}
+    // Inicia a animação quando a página é carregada
+    startAnimation();
+})(); // Marca D'água
+
+(function () {
+  'use strict';
+
+  var buttonsContainer;
+
+  GM_addStyle(`
+  .consolidated-button {
+    position: fixed;
+    bottom: calc(1% + env(safe-area-inset-bottom));
+    right: 1%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    border: none;
+    background-color: #2F2F2F; /* Cor de fundo */
+    color: #ffffff; /* Cor do texto */
+    width: 40px;
+    height: 24px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.1s; /* Inicia a transição mais rapidamente */
+    z-index: 9999;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.2); /* Sombra preta e linha branca */
+}
+
+  .consolidated-button:hover {
+    background-color: #656565; /* Cor de fundo mais escura no hover */
+  }
+
+  .consolidated-button:active {
+    filter: brightness(0.8);
+    box-shadow: 0 0 20px rgba(74, 102, 164, 0.5);
+    transform: scale(0.95) translateY(2px);
+    animation: none;
+  }
+
+  .consolidated-button::before {
+    content: url("data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 fill=%22currentColor%22 class=%22bi bi-bing%22 viewBox=%220 0 16 16%22%3E%3Cpath d=%22M8.35 5.046a.615.615 0 0 0-.54.575c-.009.13-.006.14.289.899.67 1.727.833 2.142.86 2.2q.101.215.277.395c.089.092.148.141.247.208.176.117.262.15.944.351.664.197 1.026.327 1.338.482.405.201.688.43.866.7.128.195.242.544.291.896.02.137.02.44 0 .564-.041.27-.124.495-.252.684-.067.1-.044.084.055-.039.278-.346.562-.938.707-1.475a4.42 4.42 0 0 0-2.14-5.028 70 70 0 0 0-.888-.465l-.53-.277-.353-.184c-.16-.082-.266-.138-.345-.18-.368-.192-.523-.27-.568-.283a1 1 0 0 0-.194-.03z%22/%3E%3Cpath d=%22M9.152 11.493a3 3 0 0 0-.135.083 320 320 0 0 0-1.513.934l-.8.496c-.012.01-.587.367-.876.543a1.9 1.9 0 0 1-.732.257c-.12.017-.349.017-.47 0a1.9 1.9 0 0 1-.884-.358 2.5 2.5 0 0 1-.365-.364 1.9 1.9 0 0 1-.34-.76 1 1 0 0 0-.027-.121c-.005-.006.004.092.022.22.018.132.057.324.098.489a4.1 4.1 0 0 0 2.487 2.796c.359.142.72.23 1.114.275.147.016.566.023.72.011a4.1 4.1 0 0 0 1.956-.661l.235-.149.394-.248.258-.163 1.164-.736c.51-.32.663-.433.9-.665.099-.097.248-.262.255-.283.002-.005.028-.046.059-.091a1.64 1.64 0 0 0 .25-.682c.02-.124.02-.427 0-.565a3 3 0 0 0-.213-.758c-.15-.314-.47-.6-.928-.83a2 2 0 0 0-.273-.12c-.006 0-.433.26-.948.58l-1.113.687z%22/%3E%3Cpath d=%22m3.004 12.184.03.129c.089.402.245.693.515.963a1.82 1.82 0 0 0 1.312.543c.361 0 .673-.09.994-.287l.472-.29.373-.23V5.334c0-1.537-.003-2.45-.008-2.521a1.82 1.82 0 0 0-.535-1.177c-.097-.096-.18-.16-.427-.33L4.183.24c-.239-.163-.258-.175-.33-.2a.63.63 0 0 0-.842.464c-.009.042-.01.603-.01 3.646l.003 8.035Z%22/%3E%3C/svg%3E");content: url("data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 fill=%22%23ffffff%22 class=%22bi bi-bing%22 viewBox=%220 0 16 16%22%3E%3Cpath d=%22M8.35 5.046a.615.615 0 0 0-.54.575c-.009.13-.006.14.289.899.67 1.727.833 2.142.86 2.2q.101.215.277.395c.089.092.148.141.247.208.176.117.262.15.944.351.664.197 1.026.327 1.338.482.405.201.688.43.866.7.128.195.242.544.291.896.02.137.02.44 0 .564-.041.27-.124.495-.252.684-.067.1-.044.084.055-.039.278-.346.562-.938.707-1.475a4.42 4.42 0 0 0-2.14-5.028 70 70 0 0 0-.888-.465l-.53-.277-.353-.184c-.16-.082-.266-.138-.345-.18-.368-.192-.523-.27-.568-.283a1 1 0 0 0-.194-.03z%22/%3E%3Cpath d=%22M9.152 11.493a3 3 0 0 0-.135.083 320 320 0 0 0-1.513.934l-.8.496c-.012.01-.587.367-.876.543a1.9 1.9 0 0 1-.732.257c-.12.017-.349.017-.47 0a1.9 1.9 0 0 1-.884-.358 2.5 2.5 0 0 1-.365-.364 1.9 1.9 0 0 1-.34-.76 1 1 0 0 0-.027-.121c-.005-.006.004.092.022.22.018.132.057.324.098.489a4.1 4.1 0 0 0 2.487 2.796c.359.142.72.23 1.114.275.147.016.566.023.72.011a4.1 4.1 0 0 0 1.956-.661l.235-.149.394-.248.258-.163 1.164-.736c.51-.32.663-.433.9-.665.099-.097.248-.262.255-.283.002-.005.028-.046.059-.091a1.64 1.64 0 0 0 .25-.682c.02-.124.02-.427 0-.565a3 3 0 0 0-.213-.758c-.15-.314-.47-.6-.928-.83a2 2 0 0 0-.273-.12c-.006 0-.433.26-.948.58l-1.113.687z%22/%3E%3Cpath d=%22m3.004 12.184.03.129c.089.402.245.693.515.963a1.82 1.82 0 0 0 1.312.543c.361 0 .673-.09.994-.287l.472-.29.373-.23V5.334c0-1.537-.003-2.45-.008-2.521a1.82 1.82 0 0 0-.535-1.177c-.097-.096-.18-.16-.427-.33L4.183.24c-.239-.163-.258-.175-.33-.2a.63.63 0 0 0-.842.464c-.009.042-.01.603-.01 3.646l.003 8.035Z%22/%3E%3C/svg%3E");
+    display: block;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+  .script-buttons {
+    display: none;
+    position: fixed;
+    bottom: 5%;
+    right: 1%; /* Mesmo valor que o botão principal */
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.2); /* Sombra preta e linha branca */
+    background-color: #2F2F2F; /* Cor do painel de fundo */
+    border-radius: 5px; /* Borda do painel com raio de 5px */
+    padding: 2px; /* Espaçamento interno do painel */
+}
+
+.script-buttons button {
+    display: block;
+    color: #e9e9e9; /* Cor do texto */
+    background-color: #2F2F2F; /* Cor de fundo igual à cor do painel */
+    border: none;
+    padding: 10px; /* Espaçamento interno dos botões */
+    margin: 2px; /* Distância entre os botões e o painel */
+    border-radius: 5px; /* Cantos dos botões com raio de 5px */
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s, opacity 0.3s, box-shadow 0.3s, color 0.3s; /* Adicionando transição para a cor */
+    width: calc(100% - 4px); /* Largura dos botões ajustada */
+    font-family: "Exo", sans-serif; /* Escolhendo a versão em negrito da fonte Ubuntu */
+    font-weight: 500; /* Ajustando a espessura da fonte */
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+    backface-visibility: hidden;
+    font-size: 14px; /* Tamanho da fonte dos botões aumentado */
+    text-align: left; /* Alinhamento do texto à esquerda */
+}
+
+.script-buttons.opened button:hover {
+    background-color: #656565; /* Cor de fundo mais clara no hover */
+    transition: background-color 0.1s; /* Inicia a transição mais rapidamente */
+}
+
+.script-buttons button:hover {
+    background-color: #656565; /* Cor de fundo mais clara no hover */
+    transform: none;
+    color: #FFFFFF; /* Cor do texto no hover */
+    box-shadow: none; /* Removendo a sombra no hover */
+    transition: background-color 0.1s; /* Inicia a transição mais rapidamente */
+}
+`);
+
+  var mainButton = document.createElement('button');
+  mainButton.className = 'consolidated-button';
+
+  document.body.appendChild(mainButton);
+
+  mainButton.addEventListener('mouseenter', function () {
+    // Ação ao passar o mouse sobre o botão principal
+  });
+
+  mainButton.addEventListener('mouseleave', function () {
+    // Ação ao tirar o mouse do botão principal
+  });
+
+  mainButton.addEventListener('click', function () {
+    // Ação ao clicar no botão principal
+    if (buttonsContainer) {
+      if (mainButton.classList.contains('rotate-left')) {
+        mainButton.classList.add('rotate-right');
+        buttonsContainer.style.opacity = 0;
+        buttonsContainer.style.transform = 'translateY(10px) scale(0.8)';
+        setTimeout(function () {
+          buttonsContainer.style.display = 'none';
+          mainButton.classList.remove('rotate-left', 'rotate-right');
+        }, 300);
+        return;
+      }
+    }
+
+    buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'script-buttons';
+
+    var buttonBackground = document.createElement('div');
+    buttonBackground.className = 'button-background';
+
+    var scriptButtons = [
+      { name: 'Procurar', script: realizarprocura, icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23ffffff" class="bi bi-chat-right-text-fill" viewBox="0 0 16 16"%3E%3Cpath d="M16 2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h9.586a1 1 0 0 1 .707.293l2.853 2.853a.5.5 0 0 0 .854-.353zM3.5 3h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1 0-1m0 2.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1 0-1m0 2.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1"/%3E%3C/svg%3E' },
+      { name: 'Spam', script: realizarspam, icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23ffffff" class="bi bi-magic" viewBox="0 0 16 16"%3E%3Cpath d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/%3E%3C/svg%3E' },
+    ];
+
+    scriptButtons.forEach(function (btn) {
+      var scriptButton = document.createElement('button');
+      var buttonText = document.createElement('span');
+      var buttonIcon = document.createElement('img');
+
+      buttonText.innerHTML = btn.name;
+      buttonIcon.src = btn.icon;
+      buttonIcon.style.width = '16px'; // Defina a largura do ícone
+      buttonIcon.style.height = '16px'; // Defina a altura do ícone
+      buttonIcon.style.marginRight = '7px'; // Margem direita entre o ícone e o texto do botão
+      buttonIcon.style.filter = 'invert(0)'; // Inverte a cor do ícone para branco
+
+      // Aplicar layout de flexbox ao botão e alinhar itens verticalmente
+      scriptButton.style.display = 'flex';
+      scriptButton.style.alignItems = 'center';
+
+      scriptButton.appendChild(buttonIcon);
+      scriptButton.appendChild(buttonText);
+
+      scriptButton.addEventListener('click', function () {
+        buttonsContainer.style.opacity = 0;
+        buttonsContainer.style.transform = 'translateY(10px) scale(0.8)';
+        setTimeout(function () {
+          buttonsContainer.style.display = 'none';
+          buttonsContainer.classList.remove('opened');
+          mainButton.classList.remove('rotate-left', 'rotate-right');
+        }, 300);
+        btn.script(); // Chama a função associada ao botão
+      });
+
+      buttonBackground.appendChild(scriptButton);
+    });
+
+    buttonsContainer.appendChild(buttonBackground);
+    document.body.appendChild(buttonsContainer);
+    buttonsContainer.style.display = 'block';
+    mainButton.classList.add('rotate-left');
+    setTimeout(function () {
+      buttonsContainer.classList.add('opened');
+      buttonsContainer.style.opacity = 1;
+      buttonsContainer.style.transform = 'translateY(0) scale(1)';
+    }, 50);
+  });
+
+  document.addEventListener('click', function (event) {
+    if (
+      buttonsContainer &&
+      !buttonsContainer.contains(event.target) &&
+      !mainButton.contains(event.target)
+    ) {
+      if (mainButton.classList.contains('rotate-left')) {
+        mainButton.classList.add('rotate-right');
+        buttonsContainer.style.opacity = 0;
+        buttonsContainer.style.transform = 'translateY(10px) scale(0.8)';
+        setTimeout(function () {
+          buttonsContainer.style.display = 'none';
+          buttonsContainer.classList.remove('opened');
+          mainButton.classList.remove('rotate-left', 'rotate-right');
+        }, 300);
+      }
+    }
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.ctrlKey && event.key === 'x') {
+      realizarprocura();
+    }
+  });
+
+  function realizarprocura() {
+      (function () {
+    'use strict';
+
+    function searchAndOpenChat(contactName) {
+        waitForElement('div[title="Nova conversa"]').then(() => {
+            const newChatIcon = document.querySelector('div[title="Nova conversa"]');
+
+            if (newChatIcon) {
+                simulateClick(newChatIcon);
+
+                waitForElement('div[data-tab="3"]').then(() => {
+                    const searchBox = document.querySelector('div[data-tab="3"]');
+
+                    if (searchBox) {
+                        searchBox.focus();
+                        document.execCommand('insertText', false, contactName);
+
+                        setTimeout(() => {
+                            const contact = document.querySelector(`span[title="${contactName}"]`);
+
+                            if (contact) {
+                                simulateClick(contact);
+                            } else {
+                                alert(`Contato "${contactName}" não encontrado.`);
+                            }
+                        }, 1000);
+                    }
+                });
+            }
+        });
+    }
+
+    function waitForElement(selector) {
+        return new Promise((resolve, reject) => {
+            const interval = setInterval(() => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    clearInterval(interval);
+                    resolve(element);
+                }
+            }, 500);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                reject();
+            }, 10000);
+        });
+    }
+
+    function simulateClick(element) {
+        element.click();
+    }
+
+    function createSearchModal() {
+        const modal = document.createElement('div');
+        modal.id = 'searchModal';
+        modal.style.position = 'fixed';
+        modal.style.top = '50%';
+        modal.style.left = '50%';
+        modal.style.transform = 'translate(-50%, -50%)';
+        modal.style.backgroundColor = 'rgba(43, 45, 45, 0.8)';
+        modal.style.padding = '20px';
+        modal.style.borderRadius = '10px';
+        modal.style.zIndex = '1003';
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+        modal.style.alignItems = 'center';
+        modal.style.boxShadow = '0px 8px 16px rgba(0, 0, 0, 0.4)';
+        modal.style.width = '300px';
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.3s ease-in-out';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Digite o nome do contato';
+        input.style.width = '100%';
+        input.style.marginBottom = '10px';
+        input.style.padding = '12px';
+        input.style.border = '1px solid #fff';
+        input.style.borderRadius = '5px';
+        input.style.boxSizing = 'border-box';
+        input.style.fontFamily = 'Arial, sans-serif';
+        input.style.color = '#fff';
+        input.style.background = 'rgba(255, 255, 255, 0.1)';
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.gap = '10px';
+
+        const searchModalButton = document.createElement('button');
+        searchModalButton.textContent = 'Pesquisar';
+        searchModalButton.style.backgroundColor = '#2F2F2F'; // Cor de fundo
+        searchModalButton.style.color = '#FFFFFF'; // Cor do texto
+        searchModalButton.style.padding = '12px';
+        searchModalButton.style.border = 'none';
+        searchModalButton.style.cursor = 'pointer';
+        searchModalButton.style.borderRadius = '5px';
+        searchModalButton.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.4)';
+
+        // Adicionando efeito de transição suave ao botão Pesquisar
+        searchModalButton.style.transition = 'background-color 0.3s ease';
+
+        searchModalButton.addEventListener('mouseenter', () => {
+            searchModalButton.style.backgroundColor = '#656565'; // Cor de destaque ao passar o mouse
+        });
+
+        searchModalButton.addEventListener('mouseleave', () => {
+            searchModalButton.style.backgroundColor = '#2F2F2F'; // Cor de fundo
+        });
+
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = 'Fechar';
+        closeButton.style.backgroundColor = 'rgba(192, 57, 43, 0.8)';
+        closeButton.style.color = '#fff';
+        closeButton.style.padding = '12px';
+        closeButton.style.border = 'none';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.borderRadius = '5px';
+        closeButton.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.4)';
+
+        // Adicionando efeito de transição suave ao botão Fechar
+        closeButton.style.transition = 'background-color 0.3s ease';
+
+        closeButton.addEventListener('mouseenter', () => {
+            closeButton.style.backgroundColor = 'rgba(192, 57, 43, 0.6)';
+        });
+
+        closeButton.addEventListener('mouseleave', () => {
+            closeButton.style.backgroundColor = 'rgba(192, 57, 43, 0.8)';
+        });
+
+        closeButton.addEventListener('click', () => {
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+        });
+
+        searchModalButton.addEventListener('click', () => {
+            performSearch();
+        });
+
+        input.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        function performSearch() {
+            const contactName = input.value;
+            if (contactName) {
+                searchAndOpenChat(contactName);
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
+            }
+        }
+
+        buttonContainer.appendChild(searchModalButton);
+        buttonContainer.appendChild(closeButton);
+
+        modal.appendChild(input);
+        modal.appendChild(buttonContainer);
+
+        document.body.appendChild(modal);
+
+        // Adicionando um pequeno atraso para iniciar a animação
+        setTimeout(() => {
+            modal.style.opacity = '1';
+        }, 100);
+
+        input.focus();
+    }
+
+    createSearchModal();
+})();
+
+    // Coloque aqui o código para o botão "Procurar"
+    // Exemplo: console.log("Clicou em Procurar");
+  }
+
+  function realizarspam() {
+      GM_addStyle(`
+  /* Botão de importação */
+  #importButton {
+    background-color: #2F2F2F;
+    color: #FFFFFF !important;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+    position: fixed;
+    top: 10%;
+    left: 10%;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+    z-index: 1002;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  #importButton::before {
+    content: '\\1F4C3';
+    font-family: 'Segoe UI Symbol';
+    font-size: 16px;
+    margin-right: 5px;
+    color: #FFFFFF;
+  }
+
+  #importButton:hover {
+    background-color: #656565;
+  }
+
+  /* Modal de importação */
+  #importModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(44, 44, 44, 0.9);
+    padding: 30px;
+    border-radius: 8px;
+    z-index: 1000;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+    max-width: 400px;
+    width: 200%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.2); /* Sombra preta e linha branca */
+    font-family: 'Montserrat', sans-serif; /* Adicionando a fonte Montserrat */
+  }
+
+  /* Botão de fechar modal */
+  #closeModalButton {
+    background-color: #656565;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+    width: 100%;
+    margin-top: 15px;
+    transition: background-color 0.1s ease-in-out;
+  }
+
+  #closeModalButton:hover {
+    background-color: #2F2F2F;
+  }
+
+  /* Botão de Carregar informações */
+  #importModalSubmit {
+    background-color: #656565; /* Cinza claro */
+    color: #fff;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+    width: 100%;
+    margin-top: 15px;
+    transition: background-color 0.1s ease-in-out;
+  }
+
+  #importModalSubmit:hover {
+    background-color: #2F2F2F; /* Tom mais escuro no hover */
+  }
+
+  /* Botão de parar */
+  #stopButton {
+    position: fixed;
+    bottom: calc(1% + env(safe-area-inset-bottom));
+    right: 4%;
+    background-color: #2F2F2F;
+    color: #fff;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    z-index: 1001;
+    display: none;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+    transition: background-color 0.1s ease-in-out;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.2); /* Sombra preta e linha branca */
+  }
+
+  #stopButton:hover {
+    background-color: #656565;
+  }
+
+  .notification {
+    position: fixed;
+    background-color: rgba(51, 51, 51, 1); /* Cor de fundo */
+    color: #fff; /* Cor do texto */
+    padding: 15px; /* Espaçamento interno */
+    border-radius: 5px; /* Bordas arredondadas */
+    max-width: none; /* Removendo largura máxima */
+    overflow: auto; /* Adicionado rolagem se a altura da mensagem ultrapassar o máximo */
+    font-size: 14px; /* Tamanho da fonte */
+    cursor: pointer; /* Cursor do mouse */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra suave */
+    animation: fadeIn 1s ease-out; /* Animação de entrada */
+    top: 20px; /* Posição na parte superior */
+    right: -100%; /* Posição inicial à direita da tela */
+    z-index: 9999; /* Ajuste para aparecer acima de outros elementos */
+    transition: right 1s ease; /* Adicionando transição para suavizar o movimento */
+    white-space: nowrap; /* Impede que o texto seja quebrado em várias linhas */
+}
+
+.notification + .notification {
+    right: 20px; /* Posição da próxima notificação, com margem de 20px */
+}
+
+.notification:hover {
+    background-color: #4a66a4; /* Cor de fundo no hover */
+}
+
+.notification-restart {
+    position: relative;
+    background-color: rgba(255, 0, 0, 0.9); /* Cor de fundo vermelha */
+    color: #fff; /* Cor do texto */
+    padding: 15px; /* Espaçamento interno */
+    border-radius: 5px; /* Bordas arredondadas */
+    margin-bottom: 10px; /* Margem inferior */
+    max-width: none; /* Removendo largura máxima */
+    overflow: auto; /* Adicionado rolagem se a altura da mensagem ultrapassar o máximo */
+    font-size: 14px; /* Tamanho da fonte */
+    cursor: pointer; /* Cursor do mouse */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra suave */
+    animation: pulse 1.5s infinite; /* Animação de pulso */
+    opacity: 0; /* Inicialmente invisível */
+    display: block; /* Garante que o elemento seja exibido */
+}
+
+.notification-restart:hover {
+    background-color: rgba(255, 0, 0, 0.9); /* Cor de fundo no hover */
+}
+
+.notification-restart p {
+    margin-bottom: 0; /* Remove margem inferior */
+}
+
+/* Animação de entrada */
+@keyframes fadeIn {
+    from {
+        opacity: 0; /* Opacidade inicial */
+    }
+    to {
+        opacity: 1; /* Opacidade final */
+    }
+}
+`);
+
+
+(function() {
+  'use strict';
+
+  let contactNames;
+  let messages;
+  let currentContactIndex = 0;
+  let automationPaused = false;
+  let sentToAllContacts = false;
+  let lastContactName = ''; // Adicione uma variável para armazenar o último nome pesquisado
+
+  function createImportModal() {
+    const existingModal = document.getElementById('importModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const importModal = document.createElement('div');
+    importModal.id = 'importModal';
+    importModal.innerHTML = `
+        <h2 style="margin-bottom: 20px; margin-top: 20px; font-size: 24px; font-weight: 700; color: #FFFFFF; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); background: linear-gradient(to right, #464646, #2F2F2F); display: block; padding: 10px 20px; border-radius: 5px; margin: 0 auto; transform: translate(-50%, -50%); position: relative; left: 50%; top: 50%; text-align: center;">Importar Arquivo Excel</h2> <!-- Título estilizado -->
+        <label for="fileInput" style="display: block; text-align: center; margin-bottom: 10px;">Anexar arquivo:</label>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" style="margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.2);"> <!-- Campo de seleção de arquivo com borda branca -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <button id="importModalSubmit" data-icon="attach-menu-plus" style="margin-right: 10px;">Carregar informações</button>
+            <button id="closeModalButton" data-icon="clear" style="margin-left: 10px;">Fechar</button>
+        </div>
+        <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.5); width: 80%; margin: 0 auto 20px;"> <!-- Linha ultrafina branca -->
+        <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cloud-haze2-fill" viewBox="0 0 16 16" style="margin-bottom: 10px;"> <!-- Ícone -->
+                <path d="M8.5 2a5 5 0 0 1 4.905 4.027A3 3 0 0 1 13 12H3.5A3.5 3.5 0 0 1 .035 9H5.5a.5.5 0 0 0 0-1H.035a3.5 3.5 0 0 1 3.871-2.977A5 5 0 0 1 8.5 2m-6 8a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zM0 13.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5"/></svg>
+            <p style="color: #808080; font-size: 13px; font-family: Arial, sans-serif; margin: 0;">Por favor, selecione um arquivo .xlsx ou .xls para importar seus contatos. Se apresentar qualquer problema, <a href="#" id="reloadPage">clique aqui</a> para reiniciar a página.</p> <!-- Legenda -->
+        </div>
+    `;
+
+    document.body.appendChild(importModal);
+
+    const importModalSubmitButton = document.getElementById('importModalSubmit');
+    importModalSubmitButton.addEventListener('click', () => {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            parseExcel(file);
+            document.getElementById('stopButton').style.display = 'block'; // Exibir o botão "Parar"
+            document.getElementById('importModal').style.display = 'none'; // Ocultar o modal de importação
+        } else {
+            alert('Por favor, selecione um arquivo Excel.');
+        }
+    });
+
+    // Adicione o evento de clique para fechar o modal e reiniciar a página
+    const closeModalButton = document.getElementById('closeModalButton');
+    closeModalButton.addEventListener('click', () => {
+        location.reload(); // Reiniciar a página
+    });
+
+    // Função para reiniciar a página
+    document.getElementById('reloadPage').addEventListener('click', () => {
+        location.reload();
+    });
+}
+
+
+  function createImportPrompt() {
+    document.getElementById('importModal').style.display = 'block';
+    const stopButton = document.getElementById('stopButton');
+    stopButton.style.display = 'none'; // Ocultar o botão "Parar" inicialmente
+}
+
+  function createStopButton() {
+    const stopButton = document.createElement('button');
+    stopButton.id = 'stopButton';
+    stopButton.textContent = 'Parar';
+    stopButton.addEventListener('click', () => {
+        automationPaused = !automationPaused;
+        stopButton.textContent = automationPaused ? 'Disparar' : 'Parar';
+        if (!automationPaused) {
+            sendNextMessage();
+        }
+    });
+
+    // Ocultar os botões inicialmente
+    stopButton.style.display = 'none';
+
+    document.body.appendChild(stopButton);
+
+    window.addEventListener('blur', () => {
+        // Removendo a verificação do último nome ao pausar a automação
+        automationPaused = true;
+        stopButton.textContent = 'Disparar';
+    });
+
+    window.addEventListener('focus', () => {
+        if (!automationPaused) {
+            // Verificando se há mais contatos antes de retomar a automação
+            if (currentContactIndex < contactNames.length) {
+                sendNextMessage();
+            } else if (currentContactIndex === contactNames.length && sentToAllContacts) {
+                alert('Mensagens enviadas para todos os contatos.');
+            }
+        }
+    });
+
+    // Adicione um evento para exibir os botões quando o botão "Carregar informações" for clicado e o arquivo for importado
+    const importModalSubmitButton = document.getElementById('importModalSubmit');
+    importModalSubmitButton.addEventListener('click', () => {
+        stopButton.style.display = 'block';
+    });
+}
+
+
+  function createBlocker() {
+      const blocker = document.createElement('div');
+      blocker.id = 'blocker';
+      document.body.appendChild(blocker);
+  }
+
+  function removeBlocker() {
+      const blocker = document.getElementById('blocker');
+      if (blocker) {
+          blocker.remove();
+      }
+  }
+
+  function createNotificationsContainer() {
+      const notificationsContainer = document.createElement('div');
+      notificationsContainer.id = 'notificationsContainer';
+      document.body.appendChild(notificationsContainer);
+  }
+
+  function sendNextMessage() {
+    if (!automationPaused && currentContactIndex < contactNames.length) {
+        const contactName = contactNames[currentContactIndex];
+
+        // Verifique se o próximo nome é diferente do último nome pesquisado
+        if (contactName !== lastContactName) {
+            const message = messages[currentContactIndex];
+            performSearch(contactName, message);
+        } else {
+            // Se o próximo nome for igual ao último, apenas envie a próxima mensagem na mesma conversa
+            waitForContact(contactName, messages[currentContactIndex]);
+        }
+
+        lastContactName = contactName; // Atualize o último nome pesquisado
+        currentContactIndex++;
+    } else if (currentContactIndex === contactNames.length && sentToAllContacts) {
+        const notificationsContainer = document.getElementById('notificationsContainer');
+        const restartNotification = document.createElement('div');
+        restartNotification.className = 'notification';
+        restartNotification.innerHTML = 'Mensagens enviadas para todos os contatos. Clique aqui para reiniciar a página.';
+        notificationsContainer.appendChild(restartNotification);
+        restartNotification.style.display = 'block';
+        restartNotification.addEventListener('click', () => {
+            location.reload(); // Recarrega a página quando a notificação for clicada
+        });
+    }
+}
+
+  function performSearch(name, message) {
+      createBlocker();
+      waitForElement('div[title="Nova conversa"]').then(() => {
+          const newChatIcon = document.querySelector('div[title="Nova conversa"]');
+          if (newChatIcon) {
+              simulateClick(newChatIcon);
+              waitForElement('div[data-tab="3"]').then(() => {
+                  const inputBox = document.querySelector('div[data-tab="3"]');
+                  if (inputBox) {
+                      inputBox.focus();
+                      document.execCommand('insertText', false, name);
+                      waitForContact(name, message);
+                  }
+              });
+          }
+      });
+  }
+
+  let delayTime = 50; // Tempo padrão de espera
+let speedSelected = false; // Flag para verificar se a velocidade foi selecionada
+
+function askForSpeed() {
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div id="speedModal" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #3D3D3D; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); color: #FFFFFF;">
+                    <h3 style="margin-bottom: 20px; color: #FFFFFF;">Selecione a velocidade de envio:</h3>
+                    <select id="speedSelect" style="margin-bottom: 10px; padding: 8px; border-radius: 5px; border: 1px solid #FFFFFF; background-color: #2F2F2F; color: #FFFFFF;">
+                        <option value="200" style="background-color: #2F2F2F;">200ms</option>
+                        <option value="250" style="background-color: #2F2F2F;">250ms</option>
+                        <option value="300" style="background-color: #2F2F2F;" selected>Padrão (300ms)</option>
+                        <option value="450" style="background-color: #2F2F2F;">450ms</option>
+                        <option value="500" style="background-color: #2F2F2F;">500ms</option>
+                        <option value="1000" style="background-color: #2F2F2F;">1000ms</option>
+                        <option value="2000" style="background-color: #2F2F2F;">2000ms</option>
+                    </select>
+                    <div style="color: #777777; text-align: center; margin-bottom: 15px;">Clique e escolha a velocidade do envio das mensagens</div>
+                    <div style="margin-bottom: 10px;">
+                        <input type="checkbox" id="customSpeedCheckbox" style="margin-right: 5px;">
+                        <label for="customSpeedCheckbox" style="color: #FFFFFF;">Personalizado</label>
+                    </div>
+                    <input type="number" id="customSpeedInput" placeholder="Insira a velocidade (ms)" style="margin-bottom: 10px; padding: 8px; border-radius: 5px; border: 1px solid #FFFFFF; background-color: #2F2F2F; color: #FFFFFF; display: none;">
+                    <button id="confirmSpeedBtn" style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #464646; color: #FFFFFF; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        const confirmBtn = document.getElementById('confirmSpeedBtn');
+        confirmBtn.addEventListener('click', () => {
+            confirmSpeed(resolve);
+        });
+
+        const customSpeedCheckbox = document.getElementById('customSpeedCheckbox');
+        const speedSelect = document.getElementById('speedSelect');
+
+        // Adicionar evento ao checkbox para atualizar a visibilidade do campo de entrada personalizado
+        customSpeedCheckbox.addEventListener('change', () => {
+            const customSpeedInput = document.getElementById('customSpeedInput');
+            customSpeedInput.style.display = customSpeedCheckbox.checked ? 'block' : 'none';
+
+            // Se personalizado está ativado e a opção selecionada não é padrão (300ms), desmarque a opção Padrão
+            if (customSpeedCheckbox.checked && speedSelect.value !== '300') {
+                const defaultOption = speedSelect.querySelector('option[value="300"]');
+                if (defaultOption) defaultOption.selected = false;
+            }
+        });
+    });
+}
+
+function confirmSpeed(resolve) {
+    const speedSelect = document.getElementById('speedSelect');
+    const customSpeedInput = document.getElementById('customSpeedInput');
+    let selectedValue;
+
+    if (speedSelect) {
+        selectedValue = speedSelect.value;
+        if (customSpeedInput.style.display === 'block') {
+            selectedValue = customSpeedInput.value;
+        }
+        delayTime = parseInt(selectedValue);
+        speedSelected = true;
+
+        // Se a velocidade personalizada foi selecionada e o valor é diferente de 300ms, marcar a seleção como personalizada
+        if (selectedValue !== '300') {
+            const customSpeedCheckbox = document.getElementById('customSpeedCheckbox');
+            if (customSpeedCheckbox) {
+                customSpeedCheckbox.checked = true;
+            }
+        }
+
+        const modal = document.getElementById('speedModal');
+        if (modal) {
+            modal.remove();
+            resolve();
+        }
+    }
+}
+async function waitForElement(selector) {
+    if (!speedSelected) {
+        await askForSpeed();
+    }
+
+    return new Promise((resolve) => {
+        const interval = setInterval(() => {
+            const element = document.querySelector(selector);
+            if (element) {
+                clearInterval(interval);
+                resolve(element);
+            }
+        }, delayTime);
+    });
+}
+
+async function waitForContacts() {
+    if (!speedSelected) {
+        await askForSpeed();
+    }
+
+    return new Promise((resolve) => {
+        const interval = setInterval(() => {
+            const contacts = document.querySelectorAll('span[title]');
+            if (contacts.length > 0) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, delayTime);
+    });
+}
+
+async function waitForContact(name, message) {
+    if (!speedSelected) {
+        await askForSpeed(); // Aguardar a seleção da velocidade apenas se ainda não foi selecionada
+    }
+
+    await waitForContacts(); // Esperar até que os contatos sejam carregados
+
+    const contactElement = Array.from(document.querySelectorAll('span[title]')).find(contact => contact.title === name);
+
+    if (contactElement) {
+        simulateClick(contactElement);
+        await waitForElement('div[data-tab="10"]');
+        const messageBox = document.querySelector('div[data-tab="10"]');
+        if (messageBox) {
+            messageBox.focus();
+            document.execCommand('insertText', false, message);
+            waitForSendButton();
+        }
+    } else {
+        console.error('Contact not found: ', name);
+        removeBlocker();
+        const errorMessage = `Ah não, você forneceu o nome do contato errado!\n\nO nome do contato: "${name}"\nA mensagem que seria enviada era: "${message}"\n\nPor favor me forneça o nome do contato correto, e tentarei enviar uma nova mensagem:`;
+        const newContactName = prompt(errorMessage);
+        if (newContactName !== null) {
+            if (newContactName.trim() === '') {
+                // Se a resposta for vazia, reiniciar a página
+                location.reload();
+            } else {
+                // Fechar a aba de pesquisa
+                const backButton = document.querySelector('div[aria-label="Voltar"]');
+                if (backButton) {
+                    simulateClick(backButton);
+                }
+                // Reiniciar o processo de pesquisa com o novo nome
+                setTimeout(() => {
+                    performSearch(newContactName, message);
+                }, 500);
+            }
+        } else {
+            // Se o usuário cancelar, continuar enviando para o próximo contato
+            removeBlocker(); // Remover o bloqueio antes de continuar
+            currentContactIndex++; // Avançar para o próximo contato na lista
+            sendNextMessage(); // Enviar mensagem para o próximo contato
+        }
+    }
+}
+
+async function waitForSendButton() {
+    const sendButton = await waitForElement('button[aria-label="Enviar"]');
+    simulateClick(sendButton);
+    setTimeout(() => {
+        removeBlocker();
+        showNotification(contactNames[currentContactIndex - 1], messages[currentContactIndex - 1]);
+        if (currentContactIndex === contactNames.length - 1) {
+            sentToAllContacts = true;
+        }
+        sendNextMessage();
+    }, 500); // Ajuste o tempo de espera para 2000 milissegundos (2 segundos)
+}
+  // Função para exibir notificação
+function showNotification(name, message, isError = false) {
+    const notificationsContainer = document.getElementById('notificationsContainer');
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+
+    // Montar o conteúdo da notificação com o ícone de verificação verde, o nome do contato e a mensagem
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#28a745" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M10.354 6.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
+                <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383m.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z"/>
+            </svg>
+            <div style="margin-left: 10px;">
+                <div><strong>Contato:</strong> ${name}</div>
+                <div><strong>Mensagem:</strong> ${message}</div>
+            </div>
+        </div>
+    `;
+
+    // Adicionar a notificação ao contêiner
+    notificationsContainer.appendChild(notification);
+
+    // Remover a notificação após 1500ms
+    setTimeout(() => {
+        notification.style.display = 'none';
+        notification.remove();
+    }, 1500);
+
+    // Se houver um erro (contato não encontrado), exibir alerta e reiniciar imediatamente
+    if (isError) {
+        alert(`Contato não encontrado: ${name}\nMensagem que seria enviada: ${message}`);
+        restartAfterDelay();
+    }
+
+    // Se a mensagem for enviada com sucesso para todos os contatos
+    if (currentContactIndex === contactNames.length && sentToAllContacts) {
+        alert('Mensagens enviadas para todos os contatos. Clique em "OK" para reiniciar a página.');
+        restartAfterDelay();
+    }
+}
+
+function restartAfterDelay() {
+    location.reload(); // Reiniciar a página imediatamente
+}
+
+
+  function simulateClick(element) {
+      element.click();
+  }
+
+  function parseExcel(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const sheetNames = workbook.SheetNames;
+
+        // Criar um modal para selecionar a aba
+        const selectSheetModal = document.createElement('div');
+        selectSheetModal.id = 'selectSheetModal';
+        selectSheetModal.style.display = 'flex';
+        selectSheetModal.style.flexDirection = 'column';
+        selectSheetModal.style.alignItems = 'center';
+        selectSheetModal.style.justifyContent = 'center';
+        selectSheetModal.style.position = 'fixed';
+        selectSheetModal.style.top = '0';
+        selectSheetModal.style.left = '0';
+        selectSheetModal.style.width = '100%';
+        selectSheetModal.style.height = '100%';
+        selectSheetModal.style.background = 'rgba(0, 0, 0, 0.7)'; // Fundo preto com mais transparência
+        selectSheetModal.style.zIndex = '9999';
+        selectSheetModal.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.5)'; /* Sombra preta e linha branca */
+
+        const modalContent = document.createElement('div');
+        modalContent.style.backgroundColor = '#2F2F2F'; // Fundo mais preto
+        modalContent.style.padding = '40px';
+        modalContent.style.borderRadius = '5px';
+        modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.5)'; /* Sombra preta e linha branca */
+        modalContent.style.color = '#FFFFFF';
+        modalContent.innerHTML = `
+            <h2 style="margin-top: 0; margin-bottom: 30px; font-size: 28px; font-weight: bold; text-align: center; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); color: #FFFFFF;">Escolha uma aba do Excel</h2>
+            <hr style="width: 90%; margin: 0 auto 20px; border: none; border-top: 1px solid rgba(255, 255, 255, 0.2);">
+            <div style="margin-bottom: 20px;">
+                <select id="sheetSelect" style="padding: 8px; border-radius: 5px; border: 1px solid #FFFFFF; background-color: #2F2F2F; color: #FFFFFF;">
+                    ${sheetNames.map(sheetName => `<option value="${sheetName}" style="background-color: #2F2F2F; color: #FFFFFF;">${sheetName.toUpperCase()}</option>`).join('')}
+                </select>
+                <div style="margin-top: 10px; color: #777777; text-align: left;">Clique e selecione uma das abas do seu Excel</div>
+            </div>
+            <button id="confirmSheetBtn" style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #464646; color: #FFFFFF; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
+                Confirmar
+            </button>
+            <button id="closeModalBtn" style="margin-top: 20px; padding: 6px 12px; background-color: #3D3D3D; color: #FFFFFF; border: none; border-radius: 5px; font-size: 14px; font-weight: bold; cursor: pointer;">Fechar</button>
+        `;
+        selectSheetModal.appendChild(modalContent);
+        document.body.appendChild(selectSheetModal);
+
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        closeModalBtn.addEventListener('click', () => {
+            selectSheetModal.style.display = 'none';
+        });
+
+        const confirmSheetBtn = document.getElementById('confirmSheetBtn');
+        confirmSheetBtn.addEventListener('click', () => {
+            const sheetSelect = document.getElementById('sheetSelect');
+            if (sheetSelect) {
+                const selectedSheetName = sheetSelect.value;
+                selectSheetModal.style.display = 'none';
+                parseSelectedSheet(workbook.Sheets[selectedSheetName]);
+            }
+        });
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function parseSelectedSheet(sheet) {
+    contactNames = [];
+    messages = [];
+
+    let skipFirstRow = true; // Variável para controlar se a primeira linha deve ser ignorada
+    let sendColumnPresent = false; // Variável para verificar se a coluna "Enviar" está presente
+
+    for (const cellAddress in sheet) {
+        if (cellAddress[0] === '!') continue;
+
+        const cell = sheet[cellAddress];
+        const rowIndex = parseInt(cellAddress.substring(1)); // Obtém o índice da linha atual
+
+        if (skipFirstRow && rowIndex === 1) {
+            // Ignora a primeira linha se os títulos das colunas forem encontrados
+            if (cell.v === 'Contato' && sheet[String.fromCharCode(cellAddress.charCodeAt(0) + 1) + rowIndex].v === 'Mensagem') {
+                if (sheet[String.fromCharCode(cellAddress.charCodeAt(0) + 2) + rowIndex] && sheet[String.fromCharCode(cellAddress.charCodeAt(0) + 2) + rowIndex].v === 'Enviar') {
+                    sendColumnPresent = true;
+                }
+                skipFirstRow = false;
+                continue;
+            } else {
+                // Se os títulos das colunas não forem encontrados, defina skipFirstRow como falso e continue
+                skipFirstRow = false;
+            }
+        }
+
+        if (!skipFirstRow) {
+            if (cellAddress[0] === 'A') {
+                contactNames.push(cell.v);
+            } else if (cellAddress[0] === 'B') {
+                if (cell.v !== 'Mensagem') {
+                    // Adicionar cada célula da coluna de mensagens como uma mensagem separada
+                    const paragraphs = cell.v.split('\n'); // Dividir o texto em parágrafos
+                    paragraphs.forEach(paragraph => {
+                        messages.push(paragraph.trim()); // Adicionar cada parágrafo como uma mensagem
+                    });
+                }
+            } else if (cellAddress[0] === 'C' && sendColumnPresent) {
+                if (cell.v !== 'Sim') {
+                    // Se a célula na coluna "C" não contém "Sim", pule este contato
+                    contactNames.pop();
+                    messages.pop();
+                }
+            }
+        }
+    }
+
+    if (contactNames.length > 0 && messages.length > 0) {
+        document.getElementById('importModal').style.display = 'none';
+        createNotificationsContainer();
+        sendNextMessage();
+    } else {
+        alert('O arquivo Excel deve conter pelo menos duas colunas: "Contato" e "Mensagem".');
+    }
+}
+
+
+
+  function clearData() {
+      contactNames = [];
+      messages = [];
+      currentContactIndex = 0;
+      sentToAllContacts = false;
+      lastContactName = ''; // Limpe o último nome pesquisado
+      const fileInput = document.getElementById('fileInput');
+      if (fileInput) {
+          fileInput.value = ''; // Limpa o valor do input file
+      }
+  }
+
+  function clearImportModal() {
+      clearData();
+      document.getElementById('importModal').style.display = 'none';
+  }
+
+  // Adicionar o modal à página
+  createImportModal();
+
+  const intervalId = setInterval(checkHeader, 500);
+
+  function checkHeader() {
+      const header = document.querySelector('header');
+      if (header) {
+          createStopButton();
+          createImportPrompt(); // Chame a função aqui para iniciar automaticamente
+          clearInterval(intervalId);
+      }
+  }
+})();
+    // Coloque aqui o código para o botão "Spam"
+    // Exemplo: console.log("Clicou em Spam");
+  }
+
+  function toggleAnimation() {
+    // Função para alternar a animação do botão principal
+    // Definida fora do escopo do script principal
+    if (!mainButton.classList.contains("clicked")) {
+      mainButton.classList.toggle("shaking");
+    }
+  }
+
+  setInterval(toggleAnimation, 4000);
+
+})();
