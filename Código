@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WhatsApp - Ryan Script
 // @namespace    http://tampermonkey.net/
-// @version      0.7
+// @version      0.8
 // @description  Script de Automação para funcionalidades do WhatsApp
 // @author       @ryanzera.dev
 // @license      www.instagram.com/ryanzera.dev
@@ -181,6 +181,9 @@ function animateArrow() {
   'use strict';
 
   var buttonsContainer;
+  var mainButton = document.createElement('button');
+  var isDragging = false;
+  var offset = { x: 0, y: 0 };
 
   GM_addStyle(`
   .consolidated-button {
@@ -226,14 +229,10 @@ function animateArrow() {
 }
 
   .script-buttons {
-    display: none;
-    position: fixed;
-    bottom: 5%;
-    right: 1%; /* Mesmo valor que o botão principal */
-    z-index: 9999;
+    position: absolute;
+    z-index: 9998; /* Alterado para manter abaixo do botão principal */
     opacity: 0;
-    transform: translateY(10px) scale(0.8);
-    transition: opacity 0.3s, transform 0.3s;
+    transition: opacity 0.3s;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 0.4px 0.4px rgba(255, 255, 255, 0.2); /* Sombra preta e linha branca */
     background-color: #2F2F2F; /* Cor do painel de fundo */
     border-radius: 5px; /* Borda do painel com raio de 5px */
@@ -259,40 +258,79 @@ function animateArrow() {
     text-align: left; /* Alinhamento do texto à esquerda */
 }
 
-.script-buttons.opened button:hover {
-    background-color: #656565; /* Cor de fundo mais clara no hover */
-    transition: background-color 0.1s; /* Inicia a transição mais rapidamente */
+.script-buttons.opened {
+    opacity: 1;
 }
 
 .script-buttons button:hover {
     background-color: #656565; /* Cor de fundo mais clara no hover */
-    transform: none;
-    color: #FFFFFF; /* Cor do texto no hover */
-    box-shadow: none; /* Removendo a sombra no hover */
     transition: background-color 0.1s; /* Inicia a transição mais rapidamente */
 }
 `);
 
-  var mainButton = document.createElement('button');
   mainButton.className = 'consolidated-button';
-
   document.body.appendChild(mainButton);
 
-  mainButton.addEventListener('mouseenter', function () {
-    // Ação ao passar o mouse sobre o botão principal
+    function updateButtonContainerPosition() {
+    if (buttonsContainer && mainButton) {
+      var mainButtonRect = mainButton.getBoundingClientRect();
+      var containerRect = buttonsContainer.getBoundingClientRect();
+
+      // Margem entre o botão principal e os botões secundários
+      var margin = 5;
+
+      // Determina a posição inicial dos botões secundários
+      var initialLeft = mainButtonRect.left + window.scrollX;
+      var initialTop = mainButtonRect.top + window.scrollY + mainButton.offsetHeight + margin;
+
+      // Verifica se os botões secundários cabem na tela acima do botão principal
+      if (initialTop + containerRect.height > window.innerHeight) {
+        initialTop = mainButtonRect.top + window.scrollY - containerRect.height - margin;
+      }
+
+      // Verifica se os botões secundários cabem na tela à direita do botão principal
+      var isAlignedRight = initialLeft + containerRect.width <= window.innerWidth;
+
+      // Define a posição horizontal dos botões secundários
+      var newLeft = isAlignedRight ? initialLeft : mainButtonRect.right - containerRect.width;
+
+      // Atualiza a posição dos botões secundários
+      buttonsContainer.style.left = newLeft + 'px';
+      buttonsContainer.style.top = initialTop + 'px';
+    }
+  }
+
+  mainButton.addEventListener('mousedown', function(event) {
+    isDragging = true;
+    var mainButtonRect = mainButton.getBoundingClientRect();
+    offset = {
+      x: event.clientX - mainButtonRect.left,
+      y: event.clientY - mainButtonRect.top
+    };
   });
 
-  mainButton.addEventListener('mouseleave', function () {
-    // Ação ao tirar o mouse do botão principal
+  document.addEventListener('mousemove', function(event) {
+    if (isDragging) {
+      var x = event.clientX - offset.x;
+      var y = event.clientY - offset.y;
+
+      mainButton.style.left = x + 'px';
+      mainButton.style.top = y + 'px';
+
+      updateButtonContainerPosition();
+    }
+  });
+
+  document.addEventListener('mouseup', function() {
+    isDragging = false;
   });
 
   mainButton.addEventListener('click', function () {
-    // Ação ao clicar no botão principal
     if (buttonsContainer) {
       if (mainButton.classList.contains('rotate-left')) {
         mainButton.classList.add('rotate-right');
         buttonsContainer.style.opacity = 0;
-        buttonsContainer.style.transform = 'translateY(10px) scale(0.8)';
+        buttonsContainer.classList.remove('opened');
         setTimeout(function () {
           buttonsContainer.style.display = 'none';
           mainButton.classList.remove('rotate-left', 'rotate-right');
@@ -308,9 +346,9 @@ function animateArrow() {
     buttonBackground.className = 'button-background';
 
     var scriptButtons = [
-      { name: 'Procurar', script: realizarprocura, icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23ffffff" class="bi bi-chat-right-text-fill" viewBox="0 0 16 16"%3E%3Cpath d="M16 2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h9.586a1 1 0 0 1 .707.293l2.853 2.853a.5.5 0 0 0 .854-.353zM3.5 3h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1 0-1m0 2.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1 0-1m0 2.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1"/%3E%3C/svg%3E' },
-      { name: 'Spam', script: realizarspam, icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23ffffff" class="bi bi-magic" viewBox="0 0 16 16"%3E%3Cpath d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/%3E%3C/svg%3E' },
-    ];
+  { name: 'Procurar', script: realizarprocura, icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-chat-right-text-fill" viewBox="0 0 16 16"%3E%3Cpath d="M16 2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h9.586a1 1 0 0 1 .707.293l2.853 2.853a.5.5 0 0 0 .854-.353zM3.5 3h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1 0-1m0 2.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1 0-1m0 2.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1"/%3E%3C/svg%3E' },
+  { name: 'Spam', script: realizarspam, icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-magic" viewBox="0 0 16 16"%3E%3Cpath d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/%3E%3C/svg%3E' },
+];
 
     scriptButtons.forEach(function (btn) {
       var scriptButton = document.createElement('button');
@@ -322,7 +360,7 @@ function animateArrow() {
       buttonIcon.style.width = '16px'; // Defina a largura do ícone
       buttonIcon.style.height = '16px'; // Defina a altura do ícone
       buttonIcon.style.marginRight = '7px'; // Margem direita entre o ícone e o texto do botão
-      buttonIcon.style.filter = 'invert(0)'; // Inverte a cor do ícone para branco
+      buttonIcon.style.filter = 'invert(1)'; // Transforma o ícone em branco
 
       // Aplicar layout de flexbox ao botão e alinhar itens verticalmente
       scriptButton.style.display = 'flex';
@@ -333,7 +371,6 @@ function animateArrow() {
 
       scriptButton.addEventListener('click', function () {
         buttonsContainer.style.opacity = 0;
-        buttonsContainer.style.transform = 'translateY(10px) scale(0.8)';
         setTimeout(function () {
           buttonsContainer.style.display = 'none';
           buttonsContainer.classList.remove('opened');
@@ -352,8 +389,10 @@ function animateArrow() {
     setTimeout(function () {
       buttonsContainer.classList.add('opened');
       buttonsContainer.style.opacity = 1;
-      buttonsContainer.style.transform = 'translateY(0) scale(1)';
     }, 50);
+
+    // Atualiza a posição dos botões adicionais quando o botão principal é reposicionado
+    updateButtonContainerPosition();
   });
 
   document.addEventListener('click', function (event) {
